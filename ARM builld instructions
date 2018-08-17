@@ -1,0 +1,58 @@
+																Raspberry Pi, installtion instructions
+
+note
+tested on RPI 3 Model B and Raspbian Lite
+
+
+Parts list
+	⦁	Any RPI with 512MB of memory
+	⦁	SD card 32GB or larger
+	⦁	12v/ 2.5 Amp micro usb powersupply
+	⦁	Raspbian or other Debian based flavor
+
+I'm going to assume you've flashed your SD or micro SD card, with raspbian.  If you need help, check out, https://www.raspberrypi.org/documentation/installation/installing-images/README.md, it has instuctions for Windows, Linux, and Mac.
+
+prerequisites:
+	sudo raspi-config
+		⦁	Change locale settings if needed the default is en-GB	
+		⦁	tasks enable ssh
+		⦁	modify memory split to 16MB for video
+		⦁	once those tasks are done exit the raspi-config window by pressing ESC on keyboard
+
+	1.	sudo apt update
+	2.	sudo apt upgrade
+	3.	sudo reboot now
+
+	4.	sudo apt install screen git ufw -y
+	5.	sudo reboot now
+
+Install Docker
+
+	This will take six easy steps.
+	This will download a script to install Docker for us and is based on the OS and hardware platform that you are using.
+
+	A.	curl -fsSL get.docker.com -o get-docker.sh && sh get-docker.sh
+	B.	sudo groupadd docker, this should get done in the install but Ilike to make sure
+	C.	sudo gpasswd -a $USER docker, this will add your current user to the docker group, if you have other users you wish to replace 		$USER with the account name you wish to add.
+	D.	newgrp docker, otherwise your logging out and back in or doing a reboot.
+	E.	Now on to the verification step, docker run hello-world, this will give you a greeting for docker
+	F.	sudo reboot now
+
+Install Go (golang)
+	
+	1.	Download go version 1.10.3, wget https://storage.googleapis.com/golang/go1.10.3.linux-armv6l.tar.gz
+	2.	Install Go, tar -C /usr/local -xzf go1.10.3.linux-armv6l.tar.gz
+	3.	Modify the Path, export PATH=$PATH:/usr/local/go/bin
+	4.	Add this line to the end of the .profile file,  PATH=$PATH:/usr/local/go/bin
+	5.	Check go install and configuration with go version, output should read, "go version go1.10.3 linux/arm."
+	6.	sudo reboot now
+
+Get the Nilu Platform form github and compile for arm
+	
+	A.	git clone https://github.com/NiluPlatform/go-nilu.git
+	B.	cd go-nilu
+	C.	make gilu
+	D.	Once complete we can remove all the files that we downloaded from the git repo, but first we need to move the program we just compiled, type, mv ~/go-nilu/build/bin/gilu ~/
+	E.	go-nilu>$ sudo rm -r *
+	F.	mv ~/gilu ~/go-nilu/
+	G.	test gilu now using ./gilu console --syncmode=light
