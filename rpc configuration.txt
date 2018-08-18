@@ -1,0 +1,53 @@
+Solo Mining pool configuration
+Items needed
+working operating system, will be using Raspbian, but any thing should work that can run Go and support IPv4
+gilu (go nilu implimentation)
+Firewall, will be using ufw for the examples.  Other options are windows firewall, iptables, etc...
+screen, it's a tool that allows you to have multiple prompts open in a command-line in Linux.
+
+Installing screen and ufw
+if you are continuing with us from the building instructions, then skip this step.  You can also skip if you are using an operating system other than a linux based OS.
+sudo apt update
+sudo apt upgrade
+sudo reboot
+sudo apt install ufw screen -y
+configuring the firewall, UFW (uncomplicated Firewall)
+Lets cover some basics first
+Port:  are what a place that requests can be sent to and answered by another machine on your or someone elses network.  The fire 1024 are reserved and is counted from 0-1023 so 1024 is open from their on they are undefined but form 1024 - 4000 lots of applications use them and should be avoided if possible.
+Socket: These are IP address's with a specific, or range of, port number/s.  below is an 
+example
+	socket = <IP Address>:<Port #>
+CDIR Numbers:  <IP Address>/<#> and can range for 8-30
+example
+	192.168.1.0/24 <=> IP address range    192.168.1.0 - 192.168.1.255
+			        Subnet Mask	255.255.255.0
+Protocols:  we will be several, but I'm only going to talk about two UDP and TCP
+	TCP:  means every bit of data sent is confirmed and accounted for
+	UDP: means it's just best effort and no data is resent, if it doesn't make it to the reciever
+Ports will be setting up and assumptions about your LAN
+will be using 192.168.1.0/24
+Port 22 for ssh
+Port 8546, WS-RPC port
+Port 30303, IPC port
+Port 8008, HTTP-RPC Port, this will be our pool port, but you can use any port  above 4000
+note:
+ An exception to this would be port 443 which is the port for SSL and would require more setup, then we will be covering here.
+Will be opening  SSH for the local network, sudo ufw allow from 192.168.1.0/24 ssh
+sudo ufw allow from any to 127.0.0.1 port 8546 proto tcp
+sudo ufw allow from any to 127.0.0.1 port 30303 proto tcp
+sudo ufw allow from 192.168.1.0/24 to 192.168.1.0/24 port 8008 proto tcp
+sudo ufw enable
+Now check to make sure they are setup, sudo ufw status verbose
+Creating a script to start gilu for mining
+If your haven't done so we will use screen to let the blockchain start syncing, to limit the time we have to wait before mining.
+screen -dm nilu
+screen -r nilu
+I quite lazy and only like to type thing once so we won'd be changing directories when we start gilu.  ~/go-nilu/gilu --syncmode=fast
+press ctrl+a then crtl+d to leave the nilu screen running in the background
+I've made a bash script that you can download and modify or you can create from scratch.  nano ~/go-nilu/rpc, this will create a file in the go-nilu directory located in your home folder.
+~/go-nilu/gilu --rpc --rpcaddr <192.168.1.254> --rpcport 8008 --etherbase <enter your public key here>, optional is to add --syncmode=fast, using the android or apple app to do this is a great way to create the key and no need to have a key on your solo pool as you risk loss of coins from this.
+To exit press ctrl+x, then y, and finally enter
+Next we will make our file executable, chmod +x ~/go-nilu/rpc
+Now, switch back to the nilu screen, screen -r nilu
+You should see a lot of text on the screen and scrolling as new blocks are accepted by the chain, press ctrl+c, to stop gilu
+~/go-nilu/rpc, you can't start mining until your server has the chain fully syned up.
